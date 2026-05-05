@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Controle de Obra</title>
+
+<style>
+:root {
+  --azul:#1f4e78;
+  --azul-escuro:#153955;
+  --fundo:#eef2f6;
+  --texto:#1f2933;
+  --borda:#d7e0ea;
+  --cinza:#f8fafc;
+}
+
+
+.admin-icon-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+.admin-icon-btn:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.admin-icon-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: white;
+}
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  font-family:"Segoe UI", Arial, sans-serif;
+  background:var(--fundo);
+  color:var(--texto);
+  font-size:13px;
+}
+
+.page {
+  max-width:1500px;
+  margin:20px auto;
+  background:white;
+  border-radius:14px;
+  box-shadow:0 10px 35px rgba(0,0,0,.10);
+  overflow:hidden;
+  border:1px solid #d9e1e8;
+}
+
+.topbar {
+  background:linear-gradient(135deg,var(--azul),var(--azul-escuro));
+  color:white;
+  padding:18px 24px;
+}
+
+.topbar h1 {
+  margin:0;
+  font-size:22px;
+  letter-spacing:.4px;
+}
+
+.info-grid {
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  padding:18px 24px;
+  background:var(--cinza);
+  border-bottom:1px solid var(--borda);
+}
+
+.field label,
+.mobile-field label {
+  display:block;
+  font-size:10.5px;
+  font-weight:800;
+  color:#40566b;
+  margin-bottom:5px;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+}
+
+.field input,
+input.cell,
+textarea.cell {
+  width:100%;
+  border:1px solid #cfd8e3;
+  border-radius:8px;
+  padding:8px 9px;
+  font-size:12.5px;
+  font-family:inherit;
+  background:white;
+}
+
+textarea.cell {
+  min-height:54px;
+  resize:none;
+  overflow:hidden;
+  line-height:1.35;
+}
+
+.summary {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  padding:16px 24px;
+}
+
+.card {
+  border:1px solid #dce4ec;
+  border-radius:12px;
+  padding:12px 14px;
+  background:#fff;
+}
+
+.card span {
+  font-size:10px;
+  color:#5f7182;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.card strong {
+  display:block;
+  margin-top:5px;
+  font-size:18px;
+  color:var(--azul);
+}
+
+.toolbar {
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  padding:0 24px 16px;
+  flex-wrap:wrap;
+}
+
+button {
+  border:0;
+  border-radius:8px;
+  padding:9px 13px;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  background:var(--azul);
+  color:white;
+}
+
+button.secondary { background:#64748b; }
+button.light { background:#e2e8f0; color:#163a5a; }
+
+.table-wrap {
+  padding:0 24px 28px;
+  overflow-x:auto;
+}
+
+table {
+  width:100%;
+  min-width:1320px;
+  border-collapse:collapse;
+  border:2px solid var(--azul);
+}
+
+th {
+  background:var(--azul);
+  color:white;
+  font-size:11.5px;
+  padding:8px 6px;
+  border:1px solid #174365;
+  text-align:center;
+  white-space:nowrap;
+}
+
+td {
+  border:1px solid var(--borda);
+  padding:5px;
+  vertical-align:top;
+}
+
+td.service-col {
+  min-width:320px;
+  max-width:600px;
+}
+
+.readonly {
+  background:#f1f5f9 !important;
+  font-weight:800;
+  text-align:right;
+}
+
+.center { text-align:center; }
+
+.progressBox {
+  background:#e8eef5;
+  border-radius:999px;
+  height:20px;
+  position:relative;
+  overflow:hidden;
+  min-width:80px;
+}
+
+.progressBar {
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#5cb85c,#2e7d32);
+}
+
+.progressText {
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:900;
+  color:#102a43;
+}
+
+.status {
+  display:inline-block;
+  min-width:100px;
+  text-align:center;
+  padding:5px 7px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+}
+
+.nao { background:#f1f5f9; color:#475569; }
+.andamento { background:#fff3cd; color:#8a6200; }
+.concluido { background:#d1fae5; color:#065f46; }
+
+.mobile-area {
+  display:none;
+  padding:0 14px 24px;
+}
+
+.mobile-pager {
+  display:grid;
+  grid-template-columns:44px 1fr 44px;
+  gap:8px;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.mobile-pager button {
+  padding:10px 0;
+  font-size:16px;
+}
+
+.page-indicator {
+  text-align:center;
+  background:white;
+  border:1px solid var(--borda);
+  border-radius:10px;
+  padding:9px 8px;
+  font-size:12px;
+  font-weight:900;
+  color:var(--azul);
+}
+
+.mobile-item {
+  background:white;
+  border:1px solid #dce4ec;
+  border-radius:16px;
+  padding:14px;
+  box-shadow:0 3px 10px rgba(31,78,120,.07);
+}
+
+.mobile-section {
+  border:1px solid #e3ebf3;
+  background:#fbfdff;
+  border-radius:13px;
+  padding:12px;
+  margin-bottom:12px;
+}
+
+.mobile-section-title {
+  font-size:11px;
+  font-weight:900;
+  color:var(--azul);
+  text-transform:uppercase;
+  letter-spacing:.4px;
+  margin-bottom:10px;
+}
+
+.mobile-grid {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:11px;
+}
+
+.mobile-two {
+  display:grid;
+  grid-template-columns:72px 86px 1fr;
+  gap:10px;
+}
+
+.mobile-stages {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.mobile-results {
+  display:grid;
+  gap:9px;
+}
+
+.result-line {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  font-size:12px;
+  padding:8px 0;
+  border-bottom:1px dashed #d7e0ea;
+}
+
+.result-line:last-child {
+  border-bottom:0;
+}
+
+.result-line strong {
+  color:var(--azul);
+  font-size:12.5px;
+}
+
+.mobile-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+
+.footer-note {
+  padding:0 24px 22px;
+  font-size:11.5px;
+  color:#64748b;
+}
+
+
+/* LOGIN */
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #1f4e78, #153955);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 390px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 26px;
+  box-shadow: 0 18px 45px rgba(0,0,0,.22);
+}
+
+.login-card h1 {
+  margin: 0 0 6px;
+  color: var(--azul);
+  font-size: 22px;
+}
+
+.login-card p {
+  margin: 0 0 20px;
+  color: #64748b;
+  font-size: 12.5px;
+}
+
+.login-field {
+  margin-bottom: 13px;
+}
+
+.login-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 900;
+  color: #40566b;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.login-field input {
+  width: 100%;
+  border: 1px solid #cfd8e3;
+  border-radius: 10px;
+  padding: 11px;
+  font-size: 14px;
+}
+
+.login-error {
+  display: none;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.login-help {
+  margin-top: 14px;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.save-status {
+  padding: 0 24px 14px;
+  color: #64748b;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+.admin-panel {
+  display: none;
+  margin: 0 24px 16px;
+  border: 1px solid #dce4ec;
+  border-radius: 14px;
+  background: #fbfdff;
+  padding: 16px;
+}
+
+.admin-panel h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: var(--azul);
+}
+
+.admin-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 130px;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+.admin-form label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #40566b;
+  margin-bottom: 5px;
+}
+
+.admin-form input {
+  width: 100%;
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  padding: 9px;
+  font-size: 12.5px;
+}
+
+.user-list {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #d7e0ea;
+  min-width: unset;
+}
+
+.user-list th {
+  font-size: 11px;
+  padding: 8px;
+}
+
+.user-list td {
+  font-size: 12px;
+  padding: 8px;
+}
+
+.user-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.user-actions button {
+  padding: 7px 9px;
+  font-size: 11px;
+}
+
+.admin-note {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 10px;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .admin-panel {
+    margin: 0 14px 14px;
+    padding: 14px;
+  }
+
+  .admin-form {
+    grid-template-columns: 1fr;
+  }
+
+  .user-list {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+
+.stage-box {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+
+.stage-box textarea {
+  min-height: 42px;
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+
+.mobile-stage-box {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.mobile-stage-box textarea {
+  min-height: 48px;
+}
+
+
+.force-password-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, .72);
+}
+
+.force-password-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 26px;
+  box-shadow: 0 18px 45px rgba(0,0,0,.28);
+}
+
+.force-password-card h2 {
+  margin: 0 0 8px;
+  color: var(--azul);
+  font-size: 20px;
+}
+
+.force-password-card p {
+  margin: 0 0 18px;
+  color: #64748b;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.force-password-field {
+  margin-bottom: 13px;
+}
+
+.force-password-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 900;
+  color: #40566b;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.force-password-field input {
+  width: 100%;
+  border: 1px solid #cfd8e3;
+  border-radius: 10px;
+  padding: 11px;
+  font-size: 14px;
+}
+
+.force-password-error {
+  display: none;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+.admin-reset-box {
+  margin-top: 16px;
+  border-top: 1px solid #d7e0ea;
+  padding-top: 14px;
+}
+
+.admin-reset-box h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #991b1b;
+}
+
+.admin-reset-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+button.danger {
+  background: #b91c1c;
+}
+
+button.warning {
+  background: #d97706;
+}
+
+
+.permission-select {
+  width: 100%;
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  padding: 7px;
+  font-size: 11.5px;
+  background: white;
+}
+
+.readonly-banner {
+  margin: 0 24px 14px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  color: #1e3a8a;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+body.readonly-mode input.cell,
+body.readonly-mode textarea.cell,
+body.readonly-mode .field input {
+  background: #f8fafc;
+  color: #334155;
+  cursor: default;
+}
+
+body.readonly-mode input.cell:disabled,
+body.readonly-mode textarea.cell:disabled,
+body.readonly-mode .field input:disabled {
+  opacity: 1;
+  -webkit-text-fill-color: #334155;
+}
+
+@media (max-width: 900px) {
+  .readonly-banner {
+    margin: 0 14px 14px;
+  }
+}
+
+
+.access-code-badge {
+  display: inline-block;
+  background: #e0f2fe;
+  color: #075985;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.access-code-input {
+  width: 100%;
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  padding: 7px;
+  font-size: 11.5px;
+}
+
+.filtered-view-note {
+  margin: 0 24px 14px;
+  border: 1px solid #dcfce7;
+  background: #f0fdf4;
+  color: #166534;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .filtered-view-note {
+    margin: 0 14px 14px;
+  }
+}
+
+
+.cadastro-panel {
+  display: grid;
+  grid-template-columns: 220px 1fr auto auto;
+  gap: 10px;
+  align-items: end;
+  padding: 14px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--borda);
+}
+
+.cadastro-panel label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #40566b;
+  margin-bottom: 5px;
+}
+
+.cadastro-panel input,
+.cadastro-panel select {
+  width: 100%;
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  padding: 9px;
+  font-size: 12.5px;
+  background: #fff;
+}
+
+.cadastro-code-pill {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #075985;
+  font-weight: 900;
+  font-size: 11px;
+}
+
+.filtered-view-note {
+  margin: 0 24px 14px;
+  border: 1px solid #dcfce7;
+  background: #f0fdf4;
+  color: #166534;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .cadastro-panel {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .filtered-view-note {
+    margin: 0 14px 14px;
+  }
+}
+
+@media (max-width:900px) {
+  body { font-size:12px; }
+  .page {
+    margin:0;
+    border-radius:0;
+    min-height:100vh;
+  }
+  .topbar { padding:15px 14px; }
+  .topbar h1 { font-size:18px; }
+  .info-grid {
+    grid-template-columns:1fr;
+    gap:10px;
+    padding:14px;
+  }
+  .summary {
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    padding:14px;
+  }
+  .card {
+    padding:10px 11px;
+  }
+  .card strong {
+    font-size:15px;
+  }
+  .toolbar {
+    padding:0 14px 14px;
+    display:grid;
+    grid-template-columns:1fr;
+  }
+  .table-wrap { display:none; }
+  .mobile-area { display:block; }
+  .footer-note { padding:0 14px 20px; }
+}
+
+@media (max-width:420px) {
+  .summary { grid-template-columns:1fr; }
+  .mobile-stages { grid-template-columns:1fr; }
+  .mobile-two { grid-template-columns:1fr; }
+}
+
+@media print {
+  body { background:white; }
+  .page {
+    box-shadow:none;
+    margin:0;
+    border:0;
+    border-radius:0;
+  }
+  .toolbar,
+  .mobile-area { display:none; }
+  .table-wrap {
+    display:block;
+    padding:0;
+    overflow:visible;
+  }
+  input, textarea { border:0 !important; }
+  @page {
+    size:A4 landscape;
+    margin:8mm;
+  }
+}
+</style>
+
+<meta name="theme-color" content="#1f4e78">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Controle Obra">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+</head>
+
+<body>
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <h1>Acesso Restrito</h1>
+    <p>Entre para acessar o controle da obra.</p>
+
+    <div id="loginError" class="login-error">Usuário ou senha incorretos.</div>
+
+    <div class="login-field">
+      <label>Login</label>
+      <input id="loginUser" type="text" placeholder="Digite o login">
+    </div>
+
+    <div class="login-field">
+      <label>Senha</label>
+      <input id="loginPass" type="password" placeholder="Digite a senha">
+    </div>
+
+    <button style="width:100%; padding:12px;" onclick="login()">Entrar</button>
+
+    <div class="login-help">
+      
+    </div>
+  </div>
+</div>
+
+<div id="forcePasswordScreen" class="force-password-screen">
+  <div class="force-password-card">
+    <h2>Alteração obrigatória de senha</h2>
+    <p>Por segurança, crie uma nova senha para continuar acessando o controle da obra.</p>
+
+    <div id="forcePasswordError" class="force-password-error"></div>
+
+    <div class="force-password-field">
+      <label>Nova senha</label>
+      <input id="newPasswordFirstAccess" type="password" placeholder="Digite a nova senha">
+    </div>
+
+    <div class="force-password-field">
+      <label>Confirmar nova senha</label>
+      <input id="confirmPasswordFirstAccess" type="password" placeholder="Confirme a nova senha">
+    </div>
+
+    <button style="width:100%; padding:12px;" onclick="saveFirstAccessPassword()">Salvar nova senha</button>
+  </div>
+</div>
+
+<div id="app" class="page hidden">
+  <div class="topbar" style="position:relative;">
+<div id="adminIconButton" class="admin-icon-btn hidden" onclick="toggleAdminPanel()">
+  <svg viewBox="0 0 24 24">
+    <path d="M12 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-5.33 0-8 2.67-8 8h16c0-5.33-2.67-8-8-8z"/>
+  </svg>
+</div>
+
+    <h1>CONTROLE DE OBRA</h1>
+    <div id="loggedUserName" style="margin-top:6px;font-size:12px;opacity:.9;font-weight:700;"></div>
+  </div>
+
+  <section class="cadastro-panel">
+    <div>
+      <label>Cadastro / Código</label>
+      <select id="cadastroSelect" onchange="selectCadastro(this.value)"></select>
+    </div>
+    <div>
+      <label>Descrição do cadastro</label>
+      <input id="cadastroNome" placeholder="Ex: Serviço cliente João / Etapa fachada">
+    </div>
+    <button id="btnNovoCadastro" onclick="newCadastro()">Novo cadastro</button>
+    <button id="btnFinalizarCadastro" onclick="finalizeCadastro()">Finalizar cadastro</button>
+  </section>
+
+  <section class="info-grid">
+    <div class="field"><label>Nome da Obra</label><input id="obra"></div>
+    <div class="field"><label>Local</label><input id="local"></div>
+    <div class="field"><label>Data</label><input id="data"></div>
+    <div class="field"><label>Cliente</label><input id="cliente"></div>
+    <div class="field"><label>Contato</label><input id="contato"></div>
+  </section>
+
+  <section class="summary">
+    <div class="card"><span>Valor Total da Obra</span><strong id="totalObra">R$ 0,00</strong></div>
+    <div class="card"><span>Total Executado</span><strong id="totalExecutado">R$ 0,00</strong></div>
+    <div class="card"><span>Saldo Restante</span><strong id="saldoGeral">R$ 0,00</strong></div>
+    <div class="card"><span>Progresso Geral</span><strong id="progressoGeral">0%</strong></div>
+  </section>
+
+  <div class="toolbar">
+    <button onclick="addRow()">Adicionar serviço</button>
+    <button class="danger" onclick="removeCurrentService()">Remover serviço</button>
+    <button onclick="manualSave()">Salvar informações</button>
+    
+    <button class="secondary" onclick="exportBackup()">Backup JSON</button>
+    <button class="secondary" onclick="window.print()">Imprimir / Salvar PDF</button>
+    <button class="secondary" onclick="downloadCSV()">Exportar CSV</button>
+    <button class="secondary" onclick="logout()">Sair</button>
+  </div>
+
+  <div id="saveStatus" class="save-status">Salvamento automático ativo.</div>
+  <div id="readonlyBanner" class="readonly-banner hidden">Modo visualização: seu acesso permite apenas visualizar as informações. Para alterações, solicite ao administrador.</div>
+  <div id="filteredViewNote" class="filtered-view-note hidden"></div>
+  <div id="filteredViewNote" class="filtered-view-note hidden"></div>
+
+  <div id="adminPanel" class="admin-panel">
+    <h2>Cadastro de usuários</h2>
+
+    <div class="admin-section-password">
+      <h3>Alterar senha (Administrador)</h3>
+      <div class="admin-form" style="grid-template-columns:1fr 1fr 1fr;">
+        <div>
+          <label>Senha atual</label>
+          <input id="adminCurrentPassword" type="password">
+        </div>
+        <div>
+          <label>Nova senha</label>
+          <input id="adminNewPassword" type="password">
+        </div>
+        <div>
+          <label>Confirmar senha</label>
+          <input id="adminConfirmPassword" type="password">
+        </div>
+      </div>
+      <button onclick="changeAdminPassword()">Alterar senha</button>
+    </div>
+    
+
+    <div class="admin-form">
+      <div>
+        <label>Nome</label>
+        <input id="newUserName" placeholder="Ex: Cliente João">
+      </div>
+      <div>
+        <label>Login</label>
+        <input id="newUserLogin" placeholder="Ex: joao01">
+      </div>
+      <div>
+        <label>Senha</label>
+        <input id="newUserPassword" type="password" placeholder="Digite uma senha">
+      </div>
+      <div>
+        <label>Códigos dos cadastros</label>
+        <input id="newUserCodes" placeholder="Ex: CAD001, CAD003">
+      </div>
+      <button onclick="createUser()">Cadastrar</button>
+    </div>
+
+    <table class="user-list">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Login</th>
+          <th>Perfil</th>
+          <th>Permissão</th>
+          <th>Códigos vinculados</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="usersTableBody"></tbody>
+    </table>
+
+    <div class="admin-note">
+      O usuário admin não pode ser excluído. Os usuários cadastrados ficam salvos neste navegador.
+    </div>
+
+    <div class="admin-reset-box">
+      <h3>Área de reset do administrador</h3>
+      <div class="admin-reset-actions">
+        <button class="warning" onclick="resetCurrentUserData()">Resetar dados deste usuário</button>
+        <button class="danger" onclick="resetAllSystemData()">Resetar sistema completo</button>
+      </div>
+      <div class="admin-note">
+        Recomenda-se fazer Backup JSON antes de resetar. O reset completo apaga usuários cadastrados e dados salvos.
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th><th>Código</th><th>Serviço</th><th>Valor</th>
+          <th>Etapa 1</th><th>Etapa 2</th><th>Etapa 3</th><th>Etapa 4</th><th>Etapa 5</th>
+          <th>Etapa 6</th><th>Etapa 7</th><th>Etapa 8</th><th>Etapa 9</th><th>Etapa 10</th>
+          <th>Total Executado</th><th>% Concluído</th><th>Saldo Restante</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="mobile-area">
+    <div class="mobile-pager">
+      <button class="light" onclick="prevPage()">‹</button>
+      <div class="page-indicator" id="pageIndicator">Item 1 de 1</div>
+      <button class="light" onclick="nextPage()">›</button>
+    </div>
+    <div id="mobileList"></div>
+    <div class="mobile-actions">
+      <button class="light" onclick="prevPage()">Anterior</button>
+      <button onclick="nextPage()">Próximo</button>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    No celular, cada serviço aparece como uma página separada. Cada etapa possui campo de valor e descrição. Os campos de valor aceitam o padrão brasileiro: R$ 10.200,53.
+  </div>
+</div>
+
+<script>
+const initialRows = [["1", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], ["2", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], ["3", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], ["4", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], ["5", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], ["6", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], ["7", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], ["8", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], ["9", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], ["10", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]];
+
+/* CONFIGURAÇÕES DOS USUÁRIOS */
+const DEFAULT_USERS = [
+  { login: "admin", senha: "1234", nome: "Administrador", perfil: "admin", permissao: "admin", codigosAcesso: ["*"], mustChangePassword: true }
+];
+
+const USERS_KEY = "controle_obra_residencial_lista_usuarios_v1";
+const STORAGE_PREFIX = "controle_obra_residencial_usuario_";
+const GLOBAL_DATA_KEY = "controle_obra_residencial_cadastros_globais_v1";
+const SESSION_KEY = "controle_obra_residencial_usuario_logado_v2";
+
+let currentUser = null;
+
+let rowsData = [];
+let cadastrosData = [];
+let activeCadastroCode = null;
+let currentPage = 0;
+let saveTimer = null;
+
+function emptyRow(index) {
+  return {
+    item: index,
+    codigo: activeCadastroCode || generateCadastroCode(),
+    servico: '',
+    valor: '',
+    etapas: Array.from({length:10}, () => ({valor:'', descricao:''}))
+  };
+}
+
+
+function generateCadastroCode() {
+  const next = (cadastrosData?.length || 0) + 1;
+  return 'CAD' + String(next).padStart(3, '0');
+}
+
+function createBlankInfo() {
+  return { obra:'', local:'', data:'', cliente:'', contato:'' };
+}
+
+function createBlankCadastro(code = null) {
+  const codigo = code || generateCadastroCode();
+  const oldCode = activeCadastroCode;
+  activeCadastroCode = codigo;
+
+  const rows = [];
+  for (let i = 1; i <= 10; i++) rows.push(emptyRow(i));
+
+  activeCadastroCode = oldCode;
+
+  return {
+    codigo,
+    nome: '',
+    info: createBlankInfo(),
+    rowsData: rows,
+    currentPage: 0,
+    finalizado: false,
+    savedAt: new Date().toISOString()
+  };
+}
+
+function getActiveCadastro() {
+  return cadastrosData.find(c => c.codigo === activeCadastroCode) || cadastrosData[0];
+}
+
+function setInfoFields(info) {
+  const safe = info || createBlankInfo();
+  document.getElementById('obra').value = safe.obra || '';
+  document.getElementById('local').value = safe.local || '';
+  document.getElementById('data').value = safe.data || '';
+  document.getElementById('cliente').value = safe.cliente || '';
+  document.getElementById('contato').value = safe.contato || '';
+}
+
+function syncActiveCadastroFromScreen() {
+  const cadastro = getActiveCadastro();
+  if (!cadastro) return;
+
+  cadastro.nome = document.getElementById('cadastroNome')?.value || cadastro.nome || '';
+  cadastro.info = getInfoData();
+  cadastro.rowsData = rowsData;
+  cadastro.currentPage = currentPage;
+  cadastro.savedAt = new Date().toISOString();
+
+  rowsData.forEach((row, idx) => {
+    row.codigo = cadastro.codigo;
+    row.item = row.item || idx + 1;
+  });
+}
+
+function loadCadastroToScreen(code) {
+  const cadastro = cadastrosData.find(c => c.codigo === code) || cadastrosData[0];
+  if (!cadastro) return;
+
+  activeCadastroCode = cadastro.codigo;
+  rowsData = cadastro.rowsData || [];
+  currentPage = cadastro.currentPage || 0;
+
+  rowsData.forEach((row, idx) => {
+    row.codigo = cadastro.codigo;
+    row.item = row.item || idx + 1;
+  });
+
+  document.getElementById('cadastroNome').value = cadastro.nome || '';
+  setInfoFields(cadastro.info);
+  normalizeEtapasFormat();
+  normalizeServiceCodes();
+  renderCadastroSelect();
+  renderAll();
+  applyPermissionsUI();
+}
+
+function normalizeAccessCodes(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value.map(v => String(v).trim()).filter(Boolean);
+  }
+  return String(value).split(',').map(v => v.trim()).filter(Boolean);
+}
+
+function userAccessCodes(user = currentUser) {
+  if (!user) return [];
+  if (user.perfil === 'admin') return ['*'];
+  return normalizeAccessCodes(user.codigosAcesso);
+}
+
+function visibleCadastros() {
+  if (isAdmin()) return cadastrosData;
+  const codes = userAccessCodes();
+  if (codes.includes('*')) return cadastrosData;
+  return cadastrosData.filter(c => codes.includes(String(c.codigo || '').trim()));
+}
+
+function renderCadastroSelect() {
+  const select = document.getElementById('cadastroSelect');
+  if (!select) return;
+
+  const list = visibleCadastros();
+  select.innerHTML = '';
+
+  if (!list.length) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'Nenhum cadastro liberado';
+    select.appendChild(opt);
+    return;
+  }
+
+  list.forEach(cadastro => {
+    const opt = document.createElement('option');
+    opt.value = cadastro.codigo;
+    opt.textContent = `${cadastro.codigo} - ${cadastro.nome || 'Sem descrição'}`;
+    select.appendChild(opt);
+  });
+
+  select.value = activeCadastroCode && list.some(c => c.codigo === activeCadastroCode)
+    ? activeCadastroCode
+    : list[0].codigo;
+}
+
+function selectCadastro(code) {
+  if (!code) return;
+
+  if (canEditData()) {
+    syncActiveCadastroFromScreen();
+    saveData(false);
+  }
+
+  loadCadastroToScreen(code);
+}
+
+function newCadastro() {
+  if (!isAdmin()) {
+    alert('Somente administradores podem criar cadastros.');
+    return;
+  }
+
+  syncActiveCadastroFromScreen();
+
+  const code = generateCadastroCode();
+  const cadastro = createBlankCadastro(code);
+  cadastro.nome = `Novo cadastro ${code}`;
+
+  cadastrosData.push(cadastro);
+  activeCadastroCode = cadastro.codigo;
+  rowsData = cadastro.rowsData;
+  currentPage = 0;
+
+  setInfoFields(cadastro.info);
+  document.getElementById('cadastroNome').value = cadastro.nome;
+
+  renderCadastroSelect();
+  renderAll();
+  saveData(true);
+}
+
+function finalizeCadastro() {
+  if (!isAdmin()) {
+    alert('Somente administradores podem finalizar cadastros.');
+    return;
+  }
+
+  const cadastro = getActiveCadastro();
+  if (!cadastro) return;
+
+  syncActiveCadastroFromScreen();
+  cadastro.finalizado = true;
+
+  rowsData.forEach((row, idx) => {
+    row.codigo = cadastro.codigo;
+    row.item = row.item || idx + 1;
+  });
+
+  saveData(true);
+  renderCadastroSelect();
+
+  alert(`Cadastro ${cadastro.codigo} finalizado. Agora você pode vincular esse código ao usuário no painel do administrador.`);
+
+  newCadastro();
+}
+
+function ensureCadastroStructure(saved) {
+  if (saved && Array.isArray(saved.cadastrosData)) {
+    cadastrosData = saved.cadastrosData;
+    activeCadastroCode = saved.activeCadastroCode || cadastrosData[0]?.codigo || null;
+  } else if (saved && Array.isArray(saved.rowsData)) {
+    const code = 'CAD001';
+    cadastrosData = [{
+      codigo: code,
+      nome: 'Cadastro inicial',
+      info: saved.info || createBlankInfo(),
+      rowsData: saved.rowsData,
+      currentPage: saved.currentPage || 0,
+      finalizado: true,
+      savedAt: saved.savedAt || new Date().toISOString()
+    }];
+    activeCadastroCode = code;
+  } else {
+    const first = createBlankCadastro('CAD001');
+    first.nome = 'Cadastro inicial';
+    cadastrosData = [first];
+    activeCadastroCode = first.codigo;
+  }
+
+  cadastrosData.forEach(cadastro => {
+    cadastro.codigo = String(cadastro.codigo || generateCadastroCode()).trim();
+    cadastro.nome = cadastro.nome || '';
+    cadastro.info = cadastro.info || createBlankInfo();
+    cadastro.rowsData = Array.isArray(cadastro.rowsData) ? cadastro.rowsData : [];
+
+    while (cadastro.rowsData.length < 10) {
+      const oldActive = activeCadastroCode;
+      activeCadastroCode = cadastro.codigo;
+      cadastro.rowsData.push(emptyRow(cadastro.rowsData.length + 1));
+      activeCadastroCode = oldActive;
+    }
+
+    cadastro.rowsData.forEach((row, idx) => {
+      row.codigo = cadastro.codigo;
+      row.item = row.item || idx + 1;
+    });
+  });
+}
+
+function normalizeInitialRows() {
+  const saved = loadSavedData();
+
+  ensureCadastroStructure(saved);
+
+  const visible = visibleCadastros();
+  if (!isAdmin() && visible.length) {
+    activeCadastroCode = visible.some(c => c.codigo === activeCadastroCode)
+      ? activeCadastroCode
+      : visible[0].codigo;
+  }
+
+  const active = getActiveCadastro();
+  if (!active) return;
+
+  rowsData = active.rowsData || [];
+  currentPage = active.currentPage || 0;
+
+  document.getElementById('cadastroNome').value = active.nome || '';
+  setInfoFields(active.info);
+
+  while (rowsData.length < 10) rowsData.push(emptyRow(rowsData.length + 1));
+  normalizeEtapasFormat();
+  normalizeServiceCodes();
+  renderCadastroSelect();
+}
+
+
+function normalizeEtapasFormat() {
+  rowsData.forEach(row => {
+    if (!Array.isArray(row.etapas)) {
+      row.etapas = Array.from({length:10}, () => ({valor:'', descricao:''}));
+      return;
+    }
+
+    row.etapas = row.etapas.map(etapa => {
+      if (typeof etapa === 'object' && etapa !== null) {
+        return {
+          valor: etapa.valor || '',
+          descricao: etapa.descricao || ''
+        };
+      }
+      return {
+        valor: etapa || '',
+        descricao: ''
+      };
+    });
+
+    while (row.etapas.length < 10) {
+      row.etapas.push({valor:'', descricao:''});
+    }
+
+    if (row.etapas.length > 10) {
+      row.etapas = row.etapas.slice(0, 10);
+    }
+  });
+}
+
+
+function normalizeServiceCodes() {
+  const cadastro = getActiveCadastro();
+  const code = cadastro?.codigo || activeCadastroCode || generateCadastroCode();
+
+  rowsData.forEach((row, idx) => {
+    row.codigo = code;
+    row.item = row.item || idx + 1;
+  });
+}
+
+
+
+function canSeeRow(row, user = currentUser) {
+  const cadastro = getActiveCadastro();
+  if (!cadastro) return false;
+  if (!user) return false;
+  if (user.perfil === 'admin') return true;
+
+  const codes = userAccessCodes(user);
+  if (codes.includes('*')) return true;
+  return codes.includes(String(cadastro.codigo || '').trim());
+}
+
+function visibleRowsData() {
+  if (!canAccessActiveCadastro()) return [];
+  return rowsData;
+}
+
+function canAccessActiveCadastro() {
+  const cadastro = getActiveCadastro();
+  if (!cadastro) return false;
+  if (isAdmin()) return true;
+  const codes = userAccessCodes();
+  return codes.includes('*') || codes.includes(String(cadastro.codigo || '').trim());
+}
+
+function visibleRowEntries() {
+  if (!canAccessActiveCadastro()) return [];
+  return rowsData.map((row, originalIndex) => ({ row, originalIndex }));
+}
+
+function parseBR(value) {
+  if (value === null || value === undefined) return 0;
+  let s = String(value).replace(/R\$/g,'').replace(/\s/g,'').trim();
+  if (!s) return 0;
+  s = s.replace(/\./g,'').replace(',', '.');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function moneyBR(n) {
+  return Number(n || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+}
+
+function pctBR(n) {
+  return ((Number(n || 0)) * 100).toLocaleString('pt-BR', { maximumFractionDigits:0 }) + '%';
+}
+
+function autoResizeTextarea(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + 2) + 'px';
+}
+
+function formatMoneyInput(el) {
+  const n = parseBR(el.value);
+  el.value = n ? moneyBR(n) : '';
+}
+
+function updateData(index, field, value, etapaIndex = null) {
+  if (!canEditData()) return;
+  if (!rowsData[index]) return;
+  if (field === 'etapaValor') rowsData[index].etapas[etapaIndex].valor = value;
+  else if (field === 'etapaDescricao') rowsData[index].etapas[etapaIndex].descricao = value;
+  else rowsData[index][field] = value;
+  calculate();
+  autoSave();
+}
+
+function textInput(value, onInput, center = false) {
+  const input = document.createElement('input');
+  input.className = center ? 'cell center' : 'cell';
+  input.value = value || '';
+
+  if (canEditData()) {
+    input.addEventListener('input', () => onInput(input.value));
+  } else {
+    input.disabled = true;
+  }
+
+  return input;
+}
+
+function moneyInput(value, onInput) {
+  const input = document.createElement('input');
+  input.className = 'cell';
+  input.value = value || '';
+  input.inputMode = 'decimal';
+
+  if (canEditData()) {
+    input.addEventListener('input', () => onInput(input.value));
+    input.addEventListener('blur', () => {
+      formatMoneyInput(input);
+      onInput(input.value);
+    });
+  } else {
+    input.disabled = true;
+  }
+
+  return input;
+}
+
+function serviceTextarea(value, onInput) {
+  const textarea = document.createElement('textarea');
+  textarea.className = 'cell';
+  textarea.value = value || '';
+  textarea.placeholder = 'Descreva o serviço...';
+
+  if (canEditData()) {
+    textarea.addEventListener('input', () => {
+      autoResizeTextarea(textarea);
+      onInput(textarea.value);
+    });
+  } else {
+    textarea.disabled = true;
+  }
+
+  setTimeout(() => autoResizeTextarea(textarea), 0);
+  return textarea;
+}
+
+
+function smallTextarea(value, onInput, placeholder = 'Descrição da etapa...') {
+  const textarea = document.createElement('textarea');
+  textarea.className = 'cell';
+  textarea.value = value || '';
+  textarea.placeholder = placeholder;
+
+  if (canEditData()) {
+    textarea.addEventListener('input', () => {
+      autoResizeTextarea(textarea);
+      onInput(textarea.value);
+    });
+  } else {
+    textarea.disabled = true;
+  }
+
+  setTimeout(() => autoResizeTextarea(textarea), 0);
+  return textarea;
+}
+
+function calcRow(row) {
+  const valor = parseBR(row.valor);
+  const executado = row.etapas.reduce((sum, etapa) => sum + parseBR(etapa.valor), 0);
+  const percentual = valor > 0 ? Math.min(executado / valor, 1) : 0;
+  const saldo = valor - executado;
+  const status = percentual >= 1 ? 'Concluído' : percentual > 0 ? 'Em andamento' : 'Não iniciado';
+  return { valor, executado, percentual, saldo, status };
+}
+
+function statusClass(status) {
+  return status === 'Concluído' ? 'concluido' : status === 'Em andamento' ? 'andamento' : 'nao';
+}
+
+function renderDesktop() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  visibleRowEntries().forEach(({ row, originalIndex }) => {
+    const idx = originalIndex;
+    const tr = document.createElement('tr');
+
+    let td = document.createElement('td');
+    td.appendChild(textInput(row.item, v => updateData(idx, 'item', v), true));
+    tr.appendChild(td);
+
+    td = document.createElement('td');
+    td.innerHTML = `<span class="cadastro-code-pill">${row.codigo || activeCadastroCode}</span>`;
+    tr.appendChild(td);
+
+    td = document.createElement('td');
+    td.className = 'service-col';
+    td.appendChild(serviceTextarea(row.servico, v => updateData(idx, 'servico', v)));
+    tr.appendChild(td);
+
+    td = document.createElement('td');
+    td.appendChild(moneyInput(row.valor, v => updateData(idx, 'valor', v)));
+    tr.appendChild(td);
+
+    row.etapas.forEach((etapa, etapaIdx) => {
+      td = document.createElement('td');
+      const box = document.createElement('div');
+      box.className = 'stage-box';
+      box.appendChild(moneyInput(etapa.valor, v => updateData(idx, 'etapaValor', v, etapaIdx)));
+      box.appendChild(smallTextarea(etapa.descricao, v => updateData(idx, 'etapaDescricao', v, etapaIdx)));
+      td.appendChild(box);
+      tr.appendChild(td);
+    });
+
+    td = document.createElement('td');
+    td.className = 'readonly totalExecutado';
+    tr.appendChild(td);
+
+    td = document.createElement('td');
+    td.className = 'readonly';
+    td.innerHTML = '<div class="progressBox"><div class="progressBar"></div><div class="progressText">0%</div></div>';
+    tr.appendChild(td);
+
+    td = document.createElement('td');
+    td.className = 'readonly saldo';
+    tr.appendChild(td);
+
+    td = document.createElement('td');
+    td.className = 'center readonly statusCell';
+    td.innerHTML = '<span class="status nao">Não iniciado</span>';
+    tr.appendChild(td);
+
+    tbody.appendChild(tr);
+  });
+}
+
+function renderMobilePage() {
+  const list = document.getElementById('mobileList');
+  list.innerHTML = '';
+
+  const visibleEntries = visibleRowEntries();
+
+  if (visibleEntries.length === 0) {
+    list.innerHTML = '<div class="mobile-item"><strong>Nenhum cadastro disponível.</strong><br><br>Solicite ao administrador a liberação do código.</div>';
+    document.getElementById('pageIndicator').textContent = 'Nenhum item liberado';
+    list.innerHTML = '<div class="mobile-item"><strong>Nenhum cadastro foi vinculado ao seu usuário.</strong><br><br>Solicite ao administrador a liberação do código do cadastro.</div>';
+    return;
+  }
+
+  if (currentPage < 0) currentPage = 0;
+  if (currentPage >= visibleEntries.length) currentPage = visibleEntries.length - 1;
+
+  const entry = visibleEntries[currentPage];
+  const row = entry.row;
+  const idx = entry.originalIndex;
+  const c = calcRow(row);
+
+  document.getElementById('pageIndicator').textContent = `Item ${currentPage + 1} de ${visibleEntries.length}`;
+
+  const box = document.createElement('div');
+  box.className = 'mobile-item';
+
+  const section1 = document.createElement('div');
+  section1.className = 'mobile-section';
+  section1.innerHTML = '<div class="mobile-section-title">Identificação do serviço</div>';
+
+  const topGrid = document.createElement('div');
+  topGrid.className = 'mobile-two';
+
+  let field = document.createElement('div');
+  field.className = 'mobile-field';
+  field.innerHTML = '<label>Item</label>';
+  field.appendChild(textInput(row.item, v => updateData(idx, 'item', v), true));
+  topGrid.appendChild(field);
+
+  field = document.createElement('div');
+  field.className = 'mobile-field';
+  field.innerHTML = '<label>Código</label>';
+  field.appendChild(textInput(row.codigo, v => updateData(idx, 'codigo', v), true));
+  topGrid.appendChild(field);
+
+  field = document.createElement('div');
+  field.className = 'mobile-field';
+  field.innerHTML = '<label>Código</label>';
+  field.innerHTML += `<div><span class="cadastro-code-pill">${row.codigo || activeCadastroCode}</span></div>`;
+  topGrid.appendChild(field);
+
+  field = document.createElement('div');
+  field.className = 'mobile-field';
+  field.innerHTML = '<label>Serviço</label>';
+  field.appendChild(serviceTextarea(row.servico, v => updateData(idx, 'servico', v)));
+  topGrid.appendChild(field);
+
+  section1.appendChild(topGrid);
+  box.appendChild(section1);
+
+  const section2 = document.createElement('div');
+  section2.className = 'mobile-section';
+  section2.innerHTML = '<div class="mobile-section-title">Valor inicial</div>';
+
+  field = document.createElement('div');
+  field.className = 'mobile-field';
+  field.innerHTML = '<label>Valor total do serviço</label>';
+  field.appendChild(moneyInput(row.valor, v => updateData(idx, 'valor', v)));
+  section2.appendChild(field);
+  box.appendChild(section2);
+
+  const section3 = document.createElement('div');
+  section3.className = 'mobile-section';
+  section3.innerHTML = '<div class="mobile-section-title">Etapas executadas</div>';
+
+  const stages = document.createElement('div');
+  stages.className = 'mobile-stages';
+  row.etapas.forEach((etapa, etapaIdx) => {
+    const stage = document.createElement('div');
+    stage.className = 'mobile-field';
+    stage.innerHTML = `<label>Etapa ${etapaIdx + 1}</label>`;
+    const box = document.createElement('div');
+    box.className = 'mobile-stage-box';
+    box.appendChild(moneyInput(etapa.valor, v => updateData(idx, 'etapaValor', v, etapaIdx)));
+    box.appendChild(smallTextarea(etapa.descricao, v => updateData(idx, 'etapaDescricao', v, etapaIdx)));
+    stage.appendChild(box);
+    stages.appendChild(stage);
+  });
+  section3.appendChild(stages);
+  box.appendChild(section3);
+
+  const section4 = document.createElement('div');
+  section4.className = 'mobile-section';
+  section4.innerHTML = `
+    <div class="mobile-section-title">Resumo deste item</div>
+    <div class="mobile-results">
+      <div class="result-line"><span>Total Executado</span><strong class="m-executado">${moneyBR(c.executado)}</strong></div>
+      <div class="result-line"><span>Saldo Restante</span><strong class="m-saldo">${moneyBR(c.saldo)}</strong></div>
+      <div class="result-line"><span>Progresso</span><strong class="m-percentual">${pctBR(c.percentual)}</strong></div>
+      <div class="result-line"><span>Status</span><span class="status ${statusClass(c.status)} m-status">${c.status}</span></div>
+    </div>
+  `;
+  box.appendChild(section4);
+
+  list.appendChild(box);
+}
+
+function renderAll() {
+  renderDesktop();
+  renderMobilePage();
+  calculate();
+}
+
+function calculate() {
+  let totalObra = 0;
+  let totalExecutado = 0;
+
+  rowsData.forEach((row, idx) => {
+    const c = calcRow(row);
+
+    if (canSeeRow(row)) {
+      totalObra += c.valor;
+      totalExecutado += c.executado;
+    }
+
+    const visibleIndex = visibleRowEntries().findIndex(entry => entry.originalIndex === idx);
+    const desktopRow = visibleIndex >= 0 ? document.querySelectorAll('#tbody tr')[visibleIndex] : null;
+    if (desktopRow) {
+      desktopRow.querySelector('.totalExecutado').textContent = moneyBR(c.executado);
+      desktopRow.querySelector('.saldo').textContent = moneyBR(c.saldo);
+      desktopRow.querySelector('.progressBar').style.width = (c.percentual * 100) + '%';
+      desktopRow.querySelector('.progressText').textContent = pctBR(c.percentual);
+
+      const status = desktopRow.querySelector('.status');
+      status.className = 'status ' + statusClass(c.status);
+      status.textContent = c.status;
+    }
+  });
+
+  document.getElementById('totalObra').textContent = moneyBR(totalObra);
+  document.getElementById('totalExecutado').textContent = moneyBR(totalExecutado);
+  document.getElementById('saldoGeral').textContent = moneyBR(totalObra - totalExecutado);
+  document.getElementById('progressoGeral').textContent = totalObra > 0 ? pctBR(totalExecutado / totalObra) : '0%';
+
+  const mobileItem = document.querySelector('.mobile-item');
+  const visibleEntries = visibleRowEntries();
+  if (mobileItem && visibleEntries[currentPage]) {
+    const c = calcRow(visibleEntries[currentPage].row);
+    mobileItem.querySelector('.m-executado').textContent = moneyBR(c.executado);
+    mobileItem.querySelector('.m-saldo').textContent = moneyBR(c.saldo);
+    mobileItem.querySelector('.m-percentual').textContent = pctBR(c.percentual);
+    const status = mobileItem.querySelector('.m-status');
+    status.className = 'status m-status ' + statusClass(c.status);
+    status.textContent = c.status;
+  }
+}
+
+function nextPage() {
+  const totalVisible = visibleRowEntries().length;
+  if (currentPage < totalVisible - 1) {
+    currentPage++;
+    renderMobilePage();
+    calculate();
+  }
+}
+
+function prevPage() {
+  if (currentPage > 0) {
+    currentPage--;
+    renderMobilePage();
+    calculate();
+  }
+}
+
+
+
+function removeRow(index) {
+  if (!isAdmin()) {
+    alert('Somente administradores podem remover serviços.');
+    return;
+  }
+
+  if (index < 0 || index >= rowsData.length) {
+    alert('Serviço não encontrado.');
+    return;
+  }
+
+  if (!confirm('Deseja realmente remover este serviço?')) return;
+
+  rowsData.splice(index, 1);
+
+  rowsData.forEach((row, i) => {
+    row.item = i + 1;
+    row.codigo = activeCadastroCode;
+  });
+
+  if (currentPage >= visibleRowEntries().length) {
+    currentPage = Math.max(0, visibleRowEntries().length - 1);
+  }
+
+  renderAll();
+  saveData(true);
+}
+
+function removeCurrentService() {
+  if (!isAdmin()) {
+    alert('Somente administradores podem remover serviços.');
+    return;
+  }
+
+  if (!rowsData.length) {
+    alert('Não há serviços para remover neste cadastro.');
+    return;
+  }
+
+  let item = prompt('Digite o ITEM do serviço que deseja remover neste cadastro:');
+  if (item === null) return;
+
+  item = String(item).trim();
+
+  if (!item) {
+    alert('Informe um item válido.');
+    return;
+  }
+
+  const foundIndex = rowsData.findIndex(row => String(row.item || '').trim() === item);
+
+  if (foundIndex === -1) {
+    alert('Nenhum serviço encontrado com este item.');
+    return;
+  }
+
+  const serviceName = rowsData[foundIndex].servico || 'sem descrição';
+  const confirmText = `Confirma remover o item ${item} do cadastro ${activeCadastroCode}?
+
+Serviço: ${serviceName}`;
+
+  if (!confirm(confirmText)) return;
+
+  removeRow(foundIndex);
+}
+
+function addRow() {
+  if (!canEditData()) {
+    alert('Seu acesso permite apenas visualizar as informações.');
+    return;
+  }
+
+  rowsData.push(emptyRow(rowsData.length + 1));
+  currentPage = rowsData.length - 1;
+  renderAll();
+  autoSave();
+}
+
+function exportBackup() {
+  saveData(true);
+  const payload = loadSavedData();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `backup_controle_obra_${currentUser?.login || 'usuario'}.json`;
+  a.click();
+}
+
+function downloadCSV() {
+  const headers = ['Item','Código','Serviço','Valor','Etapa 1 Valor','Etapa 1 Descrição','Etapa 2 Valor','Etapa 2 Descrição','Etapa 3 Valor','Etapa 3 Descrição','Etapa 4 Valor','Etapa 4 Descrição','Etapa 5 Valor','Etapa 5 Descrição','Etapa 6 Valor','Etapa 6 Descrição','Etapa 7 Valor','Etapa 7 Descrição','Etapa 8 Valor','Etapa 8 Descrição','Etapa 9 Valor','Etapa 9 Descrição','Etapa 10 Valor','Etapa 10 Descrição','Total Executado','% Concluído','Saldo Restante','Status'];
+  const csvRows = [headers];
+
+  rowsData.forEach(row => {
+    const c = calcRow(row);
+    csvRows.push([row.item, row.codigo, row.servico, row.valor, ...row.etapas.flatMap(etapa => [etapa.valor, etapa.descricao]), moneyBR(c.executado), pctBR(c.percentual), moneyBR(c.saldo), c.status]);
+  });
+
+  const csv = csvRows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(';')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'controle_obra.csv';
+  a.click();
+}
+
+
+
+function getUsers() {
+  try {
+    const saved = localStorage.getItem(USERS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        let changed = false;
+        parsed.forEach(u => {
+          if (typeof u.mustChangePassword === 'undefined') {
+            u.mustChangePassword = true;
+            changed = true;
+          }
+          if (typeof u.permissao === 'undefined') {
+            u.permissao = u.perfil === 'admin' ? 'admin' : 'visualizacao';
+            changed = true;
+          }
+          if (typeof u.codigosAcesso === 'undefined') {
+            u.codigosAcesso = u.perfil === 'admin' ? ['*'] : [];
+            changed = true;
+          } else {
+            u.codigosAcesso = normalizeAccessCodes(u.codigosAcesso);
+          }
+          if (typeof u.codigosAcesso === 'undefined') {
+            u.codigosAcesso = u.perfil === 'admin' ? ['*'] : [];
+            changed = true;
+          } else {
+            u.codigosAcesso = normalizeAccessCodes(u.codigosAcesso);
+          }
+        });
+        if (changed) localStorage.setItem(USERS_KEY, JSON.stringify(parsed));
+        return parsed;
+      }
+    }
+  } catch (e) {}
+
+  localStorage.setItem(USERS_KEY, JSON.stringify(DEFAULT_USERS));
+  return DEFAULT_USERS;
+}
+
+function saveUsers(users) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function isAdmin() {
+  return currentUser && currentUser.perfil === 'admin';
+}
+
+function userPermission(user = currentUser) {
+  if (!user) return 'visualizacao';
+  if (user.perfil === 'admin') return 'admin';
+  return user.permissao || 'visualizacao';
+}
+
+function canEditData() {
+  return isAdmin();
+}
+
+function isReadOnlyUser() {
+  return !canEditData();
+}
+
+function canAccessApp(user = currentUser) {
+  const perm = userPermission(user);
+  return perm !== 'bloqueado';
+}
+
+function permissionLabel(value) {
+  if (value === 'admin') return 'Administrador';
+  if (value === 'bloqueado') return 'Bloqueado';
+  return 'Somente visualizar';
+}
+
+function toggleAdminPanel() {
+  if (!isAdmin()) return;
+  const panel = document.getElementById('adminPanel');
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  renderUsersTable();
+}
+
+function renderUsersTable() {
+  const tbody = document.getElementById('usersTableBody');
+  if (!tbody) return;
+
+  const users = getUsers();
+  tbody.innerHTML = '';
+
+  users.forEach(user => {
+    const tr = document.createElement('tr');
+
+    const tdNome = document.createElement('td');
+    tdNome.textContent = user.nome || '';
+    tr.appendChild(tdNome);
+
+    const tdLogin = document.createElement('td');
+    tdLogin.textContent = user.login || '';
+    tr.appendChild(tdLogin);
+
+    const tdPerfil = document.createElement('td');
+    tdPerfil.textContent = user.perfil === 'admin' ? 'Administrador' : 'Usuário';
+    tr.appendChild(tdPerfil);
+
+    const tdPermissao = document.createElement('td');
+    if (user.perfil === 'admin') {
+      tdPermissao.textContent = 'Administrador';
+    } else {
+      const select = document.createElement('select');
+      select.className = 'permission-select';
+      select.innerHTML = `
+        <option value="visualizacao">Somente visualizar</option>
+        <option value="bloqueado">Bloqueado</option>
+      `;
+      select.value = user.permissao || 'visualizacao';
+      select.onchange = () => updateUserPermission(user.login, select.value);
+      tdPermissao.appendChild(select);
+    }
+    tr.appendChild(tdPermissao);
+
+    const tdCodigos = document.createElement('td');
+    if (user.perfil === 'admin') {
+      tdCodigos.innerHTML = '<span class="cadastro-code-pill">Todos</span>';
+    } else {
+      const inputCodes = document.createElement('input');
+      inputCodes.className = 'access-code-input';
+      inputCodes.value = normalizeAccessCodes(user.codigosAcesso).join(', ');
+      inputCodes.placeholder = 'Ex: CAD001, CAD003';
+      inputCodes.onchange = () => updateUserAccessCodes(user.login, inputCodes.value);
+      tdCodigos.appendChild(inputCodes);
+    }
+    tr.appendChild(tdCodigos);
+
+    const tdActions = document.createElement('td');
+    tdActions.className = 'user-actions';
+
+    if (user.login !== 'admin') {
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'secondary';
+      resetBtn.textContent = 'Senha';
+      resetBtn.onclick = () => changeUserPassword(user.login);
+      tdActions.appendChild(resetBtn);
+
+      const resetDataBtn = document.createElement('button');
+      resetDataBtn.className = 'warning';
+      resetDataBtn.textContent = 'Reset dados';
+      resetDataBtn.onclick = () => resetUserData(user.login);
+      tdActions.appendChild(resetDataBtn);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'secondary';
+      delBtn.textContent = 'Excluir';
+      delBtn.onclick = () => deleteUser(user.login);
+      tdActions.appendChild(delBtn);
+    } else {
+      const resetAdminDataBtn = document.createElement('button');
+      resetAdminDataBtn.className = 'warning';
+      resetAdminDataBtn.textContent = 'Reset dados';
+      resetAdminDataBtn.onclick = () => resetUserData(user.login);
+      tdActions.appendChild(resetAdminDataBtn);
+    }
+
+    tr.appendChild(tdActions);
+    tbody.appendChild(tr);
+  });
+}
+
+
+
+
+function updateUserAccessCodes(login, codesValue) {
+  if (!isAdmin()) return;
+
+  const users = getUsers();
+  const user = users.find(u => u.login === login);
+
+  if (!user || user.perfil === 'admin') return;
+
+  user.codigosAcesso = normalizeAccessCodes(codesValue);
+  saveUsers(users);
+
+  alert('Códigos vinculados atualizados com sucesso.');
+}
+
+function updateUserPermission(login, permissao) {
+  if (!isAdmin()) return;
+
+  const users = getUsers();
+  const user = users.find(u => u.login === login);
+
+  if (!user || user.perfil === 'admin') return;
+
+  user.permissao = permissao;
+  saveUsers(users);
+
+  alert('Permissão atualizada com sucesso.');
+}
+
+function resetUserData(login) {
+  if (!isAdmin()) return;
+
+  if (!confirm('Deseja apagar dados locais/sessão do usuário "' + login + '"?')) return;
+  if (!confirm('Confirme novamente. Essa ação não remove os cadastros globais, apenas dados locais antigos deste usuário.')) return;
+
+  localStorage.removeItem(STORAGE_PREFIX + login);
+
+  if (currentUser && currentUser.login === login) {
+    rowsData = [];
+    currentPage = 0;
+    normalizeInitialRows();
+    renderAll();
+    saveData(true);
+  }
+
+  alert('Dados locais do usuário resetados com sucesso.');
+}
+
+function resetCurrentUserData() {
+  if (!isAdmin()) return;
+  resetUserData(currentUser.login);
+}
+
+function resetAllSystemData() {
+  if (!isAdmin()) return;
+
+  const confirmText = prompt('Para resetar TUDO, digite RESETAR em letras maiúsculas:');
+  if (confirmText !== 'RESETAR') {
+    alert('Reset cancelado.');
+    return;
+  }
+
+  Object.keys(localStorage).forEach(key => {
+    if (
+      key.startsWith(STORAGE_PREFIX) ||
+      key === USERS_KEY ||
+      key === GLOBAL_DATA_KEY
+    ) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  sessionStorage.removeItem(SESSION_KEY);
+
+  alert('Sistema resetado com sucesso. A página será recarregada.');
+  location.reload();
+}
+
+
+
+function changeAdminPassword() {
+  if (!isAdmin()) return;
+
+  const atual = document.getElementById('adminCurrentPassword').value;
+  const nova = document.getElementById('adminNewPassword').value;
+  const confirma = document.getElementById('adminConfirmPassword').value;
+
+  if (!atual || !nova || !confirma) {
+    alert('Preencha todos os campos.');
+    return;
+  }
+
+  const users = getUsers();
+  const adminUser = users.find(u => u.login === currentUser.login);
+
+  if (!adminUser) {
+    alert('Erro ao localizar usuário.');
+    return;
+  }
+
+  if (adminUser.senha !== atual) {
+    alert('Senha atual incorreta.');
+    return;
+  }
+
+  if (nova.length < 4) {
+    alert('A nova senha deve ter pelo menos 4 caracteres.');
+    return;
+  }
+
+  if (nova !== confirma) {
+    alert('As senhas não conferem.');
+    return;
+  }
+
+  adminUser.senha = nova;
+  adminUser.mustChangePassword = false
+  saveUsers(users);
+
+  currentUser = {...adminUser};
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+
+  document.getElementById('adminCurrentPassword').value = '';
+  document.getElementById('adminNewPassword').value = '';
+  document.getElementById('adminConfirmPassword').value = '';
+
+  alert('Senha alterada com sucesso.');
+}
+
+function createUser() {
+  if (!isAdmin()) return;
+
+  const nome = document.getElementById('newUserName').value.trim();
+  const login = document.getElementById('newUserLogin').value.trim();
+  const senha = document.getElementById('newUserPassword').value;
+  const codigos = normalizeAccessCodes(document.getElementById('newUserCodes').value);
+
+  if (!nome || !login || !senha) {
+    alert('Preencha nome, login e senha.');
+    return;
+  }
+
+  if (login.includes(' ')) {
+    alert('O login não pode ter espaços.');
+    return;
+  }
+
+  const users = getUsers();
+
+  if (users.some(u => u.login === login)) {
+    alert('Já existe um usuário com esse login.');
+    return;
+  }
+
+  users.push({ nome, login, senha, perfil: 'usuario', permissao: 'visualizacao', codigosAcesso: codigos, mustChangePassword: true });
+  saveUsers(users);
+
+  document.getElementById('newUserName').value = '';
+  document.getElementById('newUserLogin').value = '';
+  document.getElementById('newUserPassword').value = '';
+  document.getElementById('newUserCodes').value = '';
+
+  renderUsersTable();
+  alert('Usuário cadastrado com sucesso.');
+}
+
+function changeUserPassword(login) {
+  if (!isAdmin()) return;
+
+  const novaSenha = prompt('Digite a nova senha para o usuário: ' + login);
+  if (!novaSenha) return;
+
+  const users = getUsers();
+  const user = users.find(u => u.login === login);
+
+  if (user) {
+    user.senha = novaSenha;
+    user.mustChangePassword = true;
+    saveUsers(users);
+    alert('Senha alterada com sucesso. O usuário deverá trocar a senha no próximo acesso.');
+  }
+}
+
+function deleteUser(login) {
+  if (!isAdmin()) return;
+
+  if (!confirm('Deseja realmente excluir o usuário "' + login + '"?')) return;
+
+  let users = getUsers();
+  users = users.filter(u => u.login !== login);
+  saveUsers(users);
+  localStorage.removeItem(STORAGE_PREFIX + login);
+
+  renderUsersTable();
+  alert('Usuário excluído com sucesso.');
+}
+
+
+function getStorageKey() {
+  const login = currentUser?.login || 'sem_usuario';
+  return STORAGE_PREFIX + login;
+}
+
+function getInfoData() {
+  return {
+    obra: document.getElementById('obra').value || '',
+    local: document.getElementById('local').value || '',
+    data: document.getElementById('data').value || '',
+    cliente: document.getElementById('cliente').value || '',
+    contato: document.getElementById('contato').value || ''
+  };
+}
+
+function saveData(showMessage = false) {
+  if (currentUser && canEditData()) {
+    syncActiveCadastroFromScreen();
+  }
+
+  const payload = {
+    cadastrosData,
+    activeCadastroCode,
+    savedAt: new Date().toISOString()
+  };
+
+  // Base global: todos os usuários visualizam os cadastros criados pelo administrador.
+  localStorage.setItem(GLOBAL_DATA_KEY, JSON.stringify(payload));
+
+  // Mantém compatibilidade com versões anteriores, sem depender disso para visualização.
+  localStorage.setItem(getStorageKey(), JSON.stringify(payload));
+
+  const status = document.getElementById('saveStatus');
+  if (status) {
+    const now = new Date().toLocaleString('pt-BR');
+    status.textContent = showMessage ? `Informações salvas com sucesso em ${now}.` : `Salvo automaticamente em ${now}.`;
+  }
+}
+
+function loadSavedData() {
+  try {
+    const globalRaw = localStorage.getItem(GLOBAL_DATA_KEY);
+    if (globalRaw) {
+      return JSON.parse(globalRaw);
+    }
+
+    // Compatibilidade com arquivos anteriores: tenta dados do usuário atual.
+    const userRaw = localStorage.getItem(getStorageKey());
+    if (userRaw) {
+      return JSON.parse(userRaw);
+    }
+
+    // Compatibilidade extra: tenta dados do administrador, onde versões antigas salvavam os cadastros.
+    const adminRaw = localStorage.getItem(STORAGE_PREFIX + 'admin');
+    if (adminRaw) {
+      const adminData = JSON.parse(adminRaw);
+      if (adminData && Array.isArray(adminData.cadastrosData)) {
+        localStorage.setItem(GLOBAL_DATA_KEY, JSON.stringify(adminData));
+        return adminData;
+      }
+    }
+
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function autoSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => saveData(false), 400);
+}
+
+function manualSave() {
+  if (!canEditData()) {
+    alert('Seu acesso permite apenas visualizar as informações.');
+    return;
+  }
+  saveData(true);
+}
+
+function setupInfoAutoSave() {
+  if (window.__infoAutoSaveReady) return;
+  window.__infoAutoSaveReady = true;
+  ['obra','local','data','cliente','contato','cadastroNome'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      if (canEditData()) autoSave();
+    });
+  });
+}
+
+function login() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+
+  const foundUser = getUsers().find(u => u.login === user && u.senha === pass);
+
+  if (foundUser) {
+    if (!canAccessApp(foundUser)) {
+      document.getElementById('loginError').textContent = 'Acesso bloqueado. Entre em contato com o administrador.';
+      document.getElementById('loginError').style.display = 'block';
+      return;
+    }
+
+    currentUser = foundUser;
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(foundUser));
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('loggedUserName').textContent = `Usuário: ${foundUser.nome}`;
+    document.getElementById('adminIconButton').classList.toggle('hidden', foundUser.perfil !== 'admin');
+
+    if (foundUser.mustChangePassword) {
+      document.getElementById('forcePasswordScreen').style.display = 'flex';
+    } else {
+      document.getElementById('app').classList.remove('hidden');
+      startApp();
+
+      const vis = visibleCadastros();
+      if (!isAdmin() && vis.length) {
+        loadCadastroToScreen(vis[0].codigo);
+      }
+    }
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+
+function saveFirstAccessPassword() {
+  const senha = document.getElementById('newPasswordFirstAccess').value;
+  const confirma = document.getElementById('confirmPasswordFirstAccess').value;
+  const errorBox = document.getElementById('forcePasswordError');
+
+  errorBox.style.display = 'none';
+  errorBox.textContent = '';
+
+  if (!senha || !confirma) {
+    errorBox.textContent = 'Preencha e confirme a nova senha.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  if (senha.length < 4) {
+    errorBox.textContent = 'A nova senha precisa ter pelo menos 4 caracteres.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  if (senha !== confirma) {
+    errorBox.textContent = 'As senhas não conferem.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  const users = getUsers();
+  const user = users.find(u => u.login === currentUser.login);
+
+  if (!user) {
+    errorBox.textContent = 'Usuário não encontrado. Faça login novamente.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  user.senha = senha;
+  user.mustChangePassword = false;
+  saveUsers(users);
+
+  currentUser = { ...user };
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+
+  document.getElementById('newPasswordFirstAccess').value = '';
+  document.getElementById('confirmPasswordFirstAccess').value = '';
+  document.getElementById('forcePasswordScreen').style.display = 'none';
+  document.getElementById('app').classList.remove('hidden');
+
+  startApp();
+    if (typeof loadCadastroToScreen === 'function') {
+      const vis = visibleCadastros();
+      if (vis.length) {
+        loadCadastroToScreen(vis[0].codigo);
+      }
+    }
+}
+
+function logout() {
+  if (canEditData()) saveData(true);
+  sessionStorage.removeItem(SESSION_KEY);
+  currentUser = null;
+  window.__appStarted = false;
+  rowsData = [];
+  currentPage = 0;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('forcePasswordScreen').style.display = 'none';
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('adminIconButton').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginPass').value = '';
+}
+
+
+function applyPermissionsUI() {
+  const readOnly = isReadOnlyUser();
+
+  document.body.classList.toggle('readonly-mode', readOnly);
+
+  const readonlyBanner = document.getElementById('readonlyBanner');
+  if (readonlyBanner) readonlyBanner.classList.toggle('hidden', !readOnly);
+
+  const filteredNote = document.getElementById('filteredViewNote');
+  if (filteredNote) {
+    const codes = userAccessCodes();
+    const showFiltered = readOnly;
+    filteredNote.classList.toggle('hidden', !showFiltered);
+    filteredNote.textContent = codes.length
+      ? `Cadastros liberados para este usuário: ${codes.join(', ')}.`
+      : 'Nenhum código de cadastro foi vinculado a este usuário.';
+  }
+
+  const btnNovo = document.getElementById('btnNovoCadastro');
+  const btnFinalizar = document.getElementById('btnFinalizarCadastro');
+  if (btnNovo) btnNovo.style.display = readOnly ? 'none' : '';
+  if (btnFinalizar) btnFinalizar.style.display = readOnly ? 'none' : '';
+
+  ['obra','local','data','cliente','contato','cadastroNome'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = readOnly;
+  });
+
+  const toolbar = document.querySelector('.toolbar');
+  if (toolbar) {
+    const buttons = toolbar.querySelectorAll('button');
+
+    buttons.forEach(btn => {
+      const label = (btn.textContent || '').trim().toLowerCase();
+
+      if (readOnly) {
+        // Non-admin users: only the Sair button remains.
+        btn.style.display = label === 'sair' ? '' : 'none';
+      } else {
+        btn.style.display = '';
+      }
+    });
+  }
+
+  const adminIcon = document.getElementById('adminIconButton');
+  if (adminIcon) {
+    adminIcon.classList.toggle('hidden', !isAdmin());
+  }
+}
+
+function startApp() {
+  window.__appStarted = false;
+  setupInfoAutoSave();
+  normalizeInitialRows();
+  renderCadastroSelect();
+  renderCadastroSelect();
+  renderAll();
+  applyPermissionsUI();
+  if (canEditData()) saveData(false);
+  window.__appStarted = true;
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')) {
+    login();
+  }
+});
+
+const savedSession = sessionStorage.getItem(SESSION_KEY);
+if (savedSession) {
+  try {
+    currentUser = JSON.parse(savedSession);
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('loggedUserName').textContent = `Usuário: ${currentUser.nome}`;
+    document.getElementById('adminIconButton').classList.toggle('hidden', currentUser.perfil !== 'admin');
+
+    if (currentUser.mustChangePassword) {
+      document.getElementById('forcePasswordScreen').style.display = 'flex';
+    } else {
+      document.getElementById('app').classList.remove('hidden');
+      startApp();
+
+      const vis = visibleCadastros();
+      if (!isAdmin() && vis.length) {
+        loadCadastroToScreen(vis[0].codigo);
+      }
+    }
+  } catch (e) {
+    sessionStorage.removeItem(SESSION_KEY);
+  }
+}
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(function() { console.log('App pronto para instalação.'); })
+      .catch(function(error) { console.log('Erro no service worker:', error); });
+  });
+}
+</script>
+
+</body>
+</html>
